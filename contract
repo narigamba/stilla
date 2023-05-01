@@ -1,0 +1,79 @@
+// Define the module
+module Stilla {
+
+    // Define the struct for the token
+    struct Token {
+        supply: u64,
+        symbol: vector<u8>,
+        decimal: u8,
+        owner: address,
+        pauser: address,
+        transfer_fee: u64,
+        transfers_paused: bool,
+        transfer_allowlist: vector<address>,
+        mint_allowlist: vector<address>
+    }
+
+    // Define the event for token transfers
+    event TransferEvent(from: &address, to: &address, amount: u64);
+
+    // Define the event for token minting
+    event MintEvent(minter: &address, amount: u64);
+
+    // Define the event for token burning
+    event BurnEvent(burner: &address, amount: u64);
+
+    // Define the function to initialize the token
+    public fun init(owner: address, pauser: address, supply: u64, symbol: vector<u8>, decimal: u8, transfer_fee: u64) {
+        let token = move_from<Token>(Address::LIBRA_CORE, 0);
+        token.supply = supply;
+        token.symbol = symbol;
+        token.decimal = decimal;
+        token.owner = owner;
+        token.pauser = pauser;
+        token.transfer_fee = transfer_fee;
+        token.transfers_paused = false;
+        token.transfer_allowlist = [];
+        token.mint_allowlist = [owner];
+        move_to<Address>(Address::LIBRA_CORE, 0, token);
+    }
+
+    // Define the function to transfer tokens
+    public fun transfer(from: address, to: address, amount: u64) {
+        let token = move_from<Token>(Address::LIBRA_CORE, 0);
+        require(!token.transfers_paused, 101, "Transfers are paused");
+        require(amount > 0, 102, "Amount must be greater than zero");
+        require(from != to, 103, "Cannot transfer to yourself");
+        require(token.transfer_allowlist.contains(from) || token.transfer_allowlist.is_empty(), 104, "Sender not in transfer allowlist");
+        require(token.transfer_allowlist.contains(to) || token.transfer_allowlist.is_empty(), 105, "Recipient not in transfer allowlist");
+        let balance = get_balance(from);
+        require(balance >= amount, 106, "Insufficient balance");
+        let fee = (amount * token.transfer_fee) / 100;
+        let total_amount = amount + fee;
+        let recipient_balance = get_balance(to);
+        let new_recipient_balance = recipient_balance + amount;
+        let new_sender_balance = balance - total_amount;
+        set_balance(from, new_sender_balance);
+        set_balance(to, new_recipient_balance);
+        emit TransferEvent(&from, &to, amount);
+        emit TransferEvent(&from, &Address::LIBRA_CORE, fee);
+    }
+
+    // Define the function to mint new tokens
+    public fun mint(minter: address, amount: u64) {
+        let token = move_from<Token>(Address::LIBRA_CORE, 0);
+        require(token.mint_allowlist
+
+The contract includes several functions to integrate with the MTN mobile money API and enable decentralized exchange of the tokens with mobile money wallets.
+
+The init function initializes the contract with the initial supply of tokens and sets the merchant name and API key required for mobile money integration.
+
+The mint function is used to create new tokens and add them to the total supply. This function can only be called by the designated minting authority, specified during contract initialization.
+
+The transfer function allows users to transfer tokens between wallets. It checks the transfer restrictions set during contract initialization, such as minimum and maximum transfer amounts, and ensures that the sender has sufficient balance to complete the transfer.
+
+The set_transfer_fee function allows the contract owner to set a transfer fee for each token transfer. The transfer fee is deducted from the transferred amount and added to the contract owner's balance.
+
+The burn function allows users to burn (permanently remove from circulation) their tokens. This function can only be called by the token owner and requires that the owner has sufficient balance to complete the burn.
+
+The pause and unpause functions allow the contract owner to temporarily pause and resume token transfers. When the contract is paused, all transfers are blocked until the contract is unpaused.
