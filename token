@@ -1,0 +1,72 @@
+// The Move standard library definitions for the Stilla Token
+module Stilla {
+    // The token is a resource that is owned by an account
+    resource struct Token {
+        // The total supply of the token
+        total_supply: u64,
+        // The current balance of the token owned by an account
+        balance: u64,
+    }
+    
+    // Event emitted when the token is transferred
+    event Transfer(sender: address, recipient: address, amount: u64);
+
+    // Event emitted when tokens are minted
+    event Mint(recipient: address, amount: u64);
+
+    // Event emitted when tokens are burned
+    event Burn(recipient: address, amount: u64);
+
+    // Create a new token with a given supply
+    public fun create_token(supply: u64) {
+        let sender: address = get_txn_sender();
+        let t: &mut Token;
+        t = move_from<Token>(sender);
+        t.total_supply = supply;
+        t.balance = supply;
+    }
+
+    // Transfer tokens from the sender to the recipient
+    public fun transfer(recipient: address, amount: u64) {
+        let sender: address = get_txn_sender();
+        let t_sender: &mut Token;
+        t_sender = move_from<Token>(sender);
+        let t_recipient: &mut Token;
+        t_recipient = move_from<Token>(recipient);
+
+        assert(t_sender.balance >= amount, 0);
+        t_sender.balance = t_sender.balance - amount;
+        t_recipient.balance = t_recipient.balance + amount;
+
+        emit Transfer(sender, recipient, amount);
+    }
+
+    // Mint new tokens and add them to the recipient's balance
+    public fun mint(recipient: address, amount: u64) {
+        let t: &mut Token;
+        t = move_from<Token>(recipient);
+        t.total_supply = t.total_supply + amount;
+        t.balance = t.balance + amount;
+        emit Mint(recipient, amount);
+    }
+
+    // Burn tokens from the recipient's balance
+    public fun burn(recipient: address, amount: u64) {
+        let t: &mut Token;
+        t = move_from<Token>(recipient);
+        assert(t.balance >= amount, 0);
+        t.total_supply = t.total_supply - amount;
+        t.balance = t.balance - amount;
+        emit Burn(recipient, amount);
+    }
+
+    // Pause all transfers
+    public fun pause() {
+        let sender: address = get_txn_sender();
+        let t: &mut Token;
+        t = move_from<Token>(sender);
+        t.transfer_allowed = false;
+    }
+
+    // Unpause all transfers
+    public fun unpause() {
