@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atipoka's Bar CRM</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="scripts.js"></script>
+</head>
+<body>
+
+    <!-- Login Page -->
+    <div id="login-page">
+        <h2>Login to Atipoka's Bar CRM</h2>
+        <div id="login-container">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter Username">
+            
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter Password">
+            
+            <button onclick="login()">Login</button>
+            <p id="login-error" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Dashboard Page (Hidden by Default) -->
+    <div id="dashboard-page" style="display:none;">
+        <h2>Welcome to Atipoka's Bar CRM</h2>
+        <div id="dashboard-container">
+            <h3 id="role-welcome"></h3>
+
+            <!-- Atipoka's Section (Deposits & Withdrawals) -->
+            <div id="atipoka-section" style="display:none;">
+                <h4>Manage Deposits & Withdrawals</h4>
+                <label for="transaction-type">Transaction Type</label>
+                <select id="transaction-type">
+                    <option value="deposit">Deposit</option>
+                    <option value="withdrawal">Withdrawal</option>
+                </select>
+                <input type="number" id="transaction-amount" placeholder="Enter Amount">
+                <button onclick="manageTransaction()">Submit</button>
+            </div>
+
+            <!-- Bar Manager's Section (Expenses & Payments) -->
+            <div id="bar-manager-section" style="display:none;">
+                <h4>Manage Expenses & Payments</h4>
+                <label for="expense-type">Expense Type</label>
+                <select id="expense-type">
+                    <option value="expense">Expense</option>
+                    <option value="payment">Payment</option>
+                </select>
+                <input type="number" id="expense-amount" placeholder="Enter Amount">
+                <button onclick="manageExpense()">Submit</button>
+            </div>
+
+            <!-- Financial Summary -->
+            <div>
+                <h4>Financial Summary</h4>
+                <p><strong>Capital:</strong> $<span id="capital">0.00</span></p>
+                <p><strong>Expenses:</strong> $<span id="expenses">0.00</span></p>
+                <p><strong>Net Balance:</strong> $<span id="net-balance">0.00</span></p>
+            </div>
+
+            <!-- WhatsApp Group Button -->
+            <div id="whatsapp-button">
+                <a href="https://wa.me/0123456789" target="_blank">
+                    <button>Join WhatsApp Group</button>
+                </a>
+            </div>
+
+            <!-- Transaction Log -->
+            <div>
+                <h4>Transaction Log</h4>
+                <ul id="transaction-log"></ul>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
